@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
+	"github.com/joho/godotenv"
 	"github.com/mhdiiilham/gominoes/api/app"
 	"github.com/mhdiiilham/gominoes/api/controllers"
 	db "github.com/mhdiiilham/gominoes/db"
@@ -13,6 +14,13 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	en_translations "gopkg.in/go-playground/validator.v9/translations/en"
 )
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
+}
 
 func main() {
 	translator := en.New()

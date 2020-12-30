@@ -9,6 +9,7 @@ require (
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/gofiber/fiber v1.14.6
 	github.com/gofiber/fiber/v2 v2.3.0
+	github.com/joho/godotenv v1.3.0
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mhdiiilham/oauth2-auth-server-implementation v0.0.0-20201224210000-fda91446f476
 	github.com/stretchr/testify v1.6.1
