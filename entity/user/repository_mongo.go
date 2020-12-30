@@ -3,6 +3,8 @@ package user
 import (
 	"context"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -22,8 +24,16 @@ func NewMongoDBRepository(collection *mongo.Collection) *MongoDBRepo {
 }
 
 // Register user function
-func (r *MongoDBRepo) Register(user User) string {
-	return ""
+func (r *MongoDBRepo) Register(e User) string {
+	res, err := r.Collection.InsertOne(r.Ctx, e)
+	if err != nil {
+		return ""
+	}
+	oid, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return ""
+	}
+	return oid.Hex()
 }
 
 // FindOne user function
