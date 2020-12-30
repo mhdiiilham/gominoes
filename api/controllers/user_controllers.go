@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"net/http"
+
 	ut "github.com/go-playground/universal-translator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/mhdiiilham/gominoes/entity/user"
@@ -30,12 +32,36 @@ func NewUserController(r fiber.Router, m user.Manager, ts jwt.TokenService, v *v
 		Validate: v,
 		Trans:    t,
 	}
-	r.Get("/auth/registrations", controller.register)
+	r.Post("/auth/registrations", controller.register)
 }
 
 func (c *UserController) register(ctx *fiber.Ctx) error {
-	msg := map[string]string{
-		"message": "Hello World",
+	i := registerInput{}
+
+	if err := ctx.BodyParser(&i); err != nil {
+		return fiber.ErrInternalServerError
 	}
-	return ctx.Status(200).JSON(msg)
+
+	user := user.User{
+		Fullname: i.Fullname,
+		Email:    i.Email,
+		Password: i.Password,
+	}
+	id := c.m.Register(user)
+
+	if id == "" {
+		return fiber.ErrInternalServerError
+	}
+
+	token := c.Token.Generate(&user)
+
+	return ctx.Status(200).JSON(struct {
+		Code        int    `json:"code"`
+		Message     string `json:"message"`
+		AccessToken string `json:"access_token"`
+	}{
+		Code:        http.StatusCreated,
+		Message:     "Success Create User",
+		AccessToken: token,
+	})
 }
