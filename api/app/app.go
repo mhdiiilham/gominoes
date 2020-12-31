@@ -19,33 +19,3 @@ func SetupApp() *fiber.App {
 	})
 	return app
 }
-
-func customErrHandler(ctx *fiber.Ctx, err error) error {
-	code := http.StatusInternalServerError
-	msg := "Internal Server Error"
-
-	if e, ok := err.(*fiber.Error); ok {
-		code = e.Code
-		msg = e.Message
-	}
-
-	err = ctx.Status(code).JSON(struct {
-		Code    int
-		Message string
-	}{
-		Code:    code,
-		Message: msg,
-	})
-
-	if err != nil {
-		return ctx.Status(500).JSON(struct {
-			Code int
-			Msg  string
-		}{
-			Code: 500,
-			Msg:  "Fuck",
-		})
-	}
-
-	return nil
-}
