@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	ut "github.com/go-playground/universal-translator"
@@ -25,20 +26,22 @@ type registerInput struct {
 }
 
 // NewUserController function
-func NewUserController(r fiber.Router, m user.Manager, ts jwt.TokenService, v *validator.Validate, t ut.Translator) {
+func NewUserController(m user.Manager, ts jwt.TokenService, v *validator.Validate, t ut.Translator) *UserController {
 	controller := &UserController{
 		m:        m,
 		Token:    ts,
 		Validate: v,
 		Trans:    t,
 	}
-	r.Post("/auth/registrations", controller.register)
+	return controller
 }
 
-func (c *UserController) register(ctx *fiber.Ctx) error {
+// Register handler
+func (c *UserController) Register(ctx *fiber.Ctx) error {
 	i := registerInput{}
 
 	if err := ctx.BodyParser(&i); err != nil {
+		fmt.Println("Dari sini")
 		return fiber.ErrInternalServerError
 	}
 
@@ -50,18 +53,19 @@ func (c *UserController) register(ctx *fiber.Ctx) error {
 	id := c.m.Register(user)
 
 	if id == "" {
+		fmt.Println("ada sini?")
 		return fiber.ErrInternalServerError
 	}
 
 	token := c.Token.Generate(&user)
 
-	return ctx.Status(200).JSON(struct {
+	return ctx.Status(http.StatusCreated).JSON(struct {
 		Code        int    `json:"code"`
 		Message     string `json:"message"`
 		AccessToken string `json:"access_token"`
 	}{
 		Code:        http.StatusCreated,
-		Message:     "Success Create User",
+		Message:     "Success created new user",
 		AccessToken: token,
 	})
 }

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -27,6 +28,7 @@ func NewMongoDBRepository(collection *mongo.Collection) *MongoDBRepo {
 func (r *MongoDBRepo) Register(e User) string {
 	res, err := r.Collection.InsertOne(r.Ctx, e)
 	if err != nil {
+		fmt.Println("Error->", err.Error())
 		return ""
 	}
 	oid, ok := res.InsertedID.(primitive.ObjectID)
