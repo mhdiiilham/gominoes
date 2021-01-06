@@ -25,17 +25,24 @@ func NewMongoDBRepository(collection *mongo.Collection) *MongoDBRepo {
 }
 
 // Register user function
-func (r *MongoDBRepo) Register(e User) string {
+func (r *MongoDBRepo) Register(e User) (*User, error) {
 	res, err := r.Collection.InsertOne(r.Ctx, e)
 	if err != nil {
 		fmt.Println("Error->", err.Error())
-		return ""
+		return nil, err
 	}
 	oid, ok := res.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return ""
+		return nil, err
+
 	}
-	return oid.Hex()
+	return &User{
+		ID:       oid,
+		Fullname: e.Fullname,
+		Email:    e.Email,
+		Password: e.Password,
+	}, nil
+	// return nil
 }
 
 // FindOne user function

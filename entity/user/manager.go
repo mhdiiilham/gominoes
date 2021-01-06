@@ -1,23 +1,23 @@
 package user
 
-import (
-	"github.com/mhdiiilham/gominoes/pkg/password"
-)
+import "github.com/mhdiiilham/gominoes/pkg/password"
 
 type manager struct {
 	Repo Repository
+	Pwd  password.Hasher
 }
 
 // NewManager create new repository
-func NewManager(r Repository) *manager {
+func NewManager(r Repository, pwd password.Hasher) *manager {
 	return &manager{
 		Repo: r,
+		Pwd:  pwd,
 	}
 }
 
 // Register new user
-func (s *manager) Register(user User) string {
-	hashPassword := password.Hash(user.Password)
+func (s *manager) Register(user User) (*User, error) {
+	hashPassword := s.Pwd.Hash(user.Password)
 	user.Password = hashPassword
 	return s.Repo.Register(user)
 }

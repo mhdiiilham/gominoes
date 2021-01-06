@@ -2,7 +2,7 @@ package user
 
 // Writer interface
 type Writer interface {
-	Register(user User) string
+	Register(e User) (*User, error)
 }
 
 // Reader interface
