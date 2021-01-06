@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	ut "github.com/go-playground/universal-translator"
@@ -41,7 +40,6 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 	i := registerInput{}
 
 	if err := ctx.BodyParser(&i); err != nil {
-		fmt.Println("Dari sini")
 		return fiber.ErrInternalServerError
 	}
 
@@ -50,14 +48,12 @@ func (c *UserController) Register(ctx *fiber.Ctx) error {
 		Email:    i.Email,
 		Password: i.Password,
 	}
-	id := c.m.Register(user)
-
-	if id == "" {
-		fmt.Println("ada sini?")
-		return fiber.ErrInternalServerError
+	newUser, err := c.m.Register(user)
+	if err != nil {
+		return err
 	}
 
-	token := c.Token.Generate(&user)
+	token := c.Token.Generate(newUser)
 
 	return ctx.Status(http.StatusCreated).JSON(struct {
 		Code        int    `json:"code"`
