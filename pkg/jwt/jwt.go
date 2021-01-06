@@ -15,10 +15,11 @@ type TokenService interface {
 	Verify(jwtToken string) (*jwt.Token, error)
 	Validate(jwtToken string) error
 	GetIssuer() string
-	Extract(jwtToken string) (*jwtCustomCliams, error)
+	Extract(jwtToken string) (*CustomClaims, error)
 }
 
-type jwtCustomCliams struct {
+// CustomClaims struct
+type CustomClaims struct {
 	Email string `json:"email"`
 	jwt.StandardClaims
 }
@@ -44,7 +45,7 @@ func (j *jwtService) GetIssuer() string {
 
 // Generate JWT Token
 func (j *jwtService) Generate(e *user.User) string {
-	claims := &jwtCustomCliams{
+	claims := &CustomClaims{
 		e.Email,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 42).Unix(),
@@ -94,7 +95,7 @@ func (j *jwtService) Validate(tokenString string) error {
 }
 
 // Extract JWTToken MetaData
-func (j *jwtService) Extract(tokenString string) (*jwtCustomCliams, error) {
+func (j *jwtService) Extract(tokenString string) (*CustomClaims, error) {
 	token, err := j.Verify(tokenString)
 	if err != nil {
 		return nil, err
@@ -107,7 +108,7 @@ func (j *jwtService) Extract(tokenString string) (*jwtCustomCliams, error) {
 			return nil, err
 		}
 
-		return &jwtCustomCliams{
+		return &CustomClaims{
 			Email: email,
 		}, nil
 	}
