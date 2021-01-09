@@ -20,10 +20,11 @@ var rsa256 string = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSUzI1NmluT1
 var anotherIssuer string = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MDQwNjU5MDEsImV4cCI6MTYzNTYwMTkwMSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.wR0L7T9T2hzfOlODGG8K4Anr4YX_E7kgPOe8so8ejLw2N4sF-jhsnf3crP20CH4YwvGJgnFAutalvbiWrkVUqg"
 
 func init() {
+	b := password.NewBCryptHash()
 	user := user.User{
 		Fullname: "Muhammad Ilham",
 		Email:    "example@mail.com",
-		Password: password.Hash("HelloWorld"),
+		Password: b.Hash("HelloWorld"),
 	}
 	entity = user
 
