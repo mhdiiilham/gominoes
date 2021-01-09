@@ -13,7 +13,7 @@ run:
 	go run api/main.go
 
 test:
-	go test ./...
+	go test ./... -v
 
 sec:
 	go get github.com/securego/gosec/v2/cmd/gosec
