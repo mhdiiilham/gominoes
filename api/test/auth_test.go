@@ -77,7 +77,7 @@ func TestRegisterAPI(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
-			pwdMock.EXPECT().Hash(gomock.Any()).Return("").Times(1)
+			pwdMock.EXPECT().Hash(gomock.Any()).Return(tc.Payload.Password).Times(1)
 			urMock.EXPECT().Register(tc.Payload).Return(&tc.Payload, nil).Times(1)
 			jwtMock.EXPECT().Generate(&tc.Payload).Times(1)
 
@@ -99,5 +99,6 @@ func generateUser() user.User {
 	return user.User{
 		Fullname: faker.Name(),
 		Email:    faker.Email(),
+		Password: faker.Password(),
 	}
 }
