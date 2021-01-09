@@ -9,7 +9,7 @@ BIN_DIR = $(PWD)/bin
 
 .PHONY: build
 
-run:
+run-api:
 	go run api/main.go
 
 test:
