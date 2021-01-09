@@ -2,7 +2,7 @@ package api_test
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -50,6 +50,7 @@ func TestRoot(t *testing.T) {
 func TestRegisterAPI(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+
 	urMock := mock.NewMockManager(ctrl)
 	pwdMock := mock.NewMockHasher(ctrl)
 	userManager := user.NewManager(urMock, pwdMock)
@@ -61,38 +62,54 @@ func TestRegisterAPI(t *testing.T) {
 	jwtMock := mock.NewMockTokenService(ctrl)
 	r := app.SetupApp(managers, jwtMock, v, trans)
 
-	testCases := []struct {
-		Name    string
-		Code    int
-		Msg     string
-		Payload user.User
-	}{
-		{
-			Name:    "Register success",
-			Code:    http.StatusCreated,
-			Msg:     "Success created new user",
-			Payload: generateUser(),
-		},
+	payload := generateUser()
+
+	pwdMock.EXPECT().Hash(gomock.Any()).Return(payload.Password).Times(1)
+	urMock.EXPECT().Register(payload).Return(&payload, nil).Times(1)
+	jwtMock.EXPECT().Generate(&payload).Times(1)
+
+	res := map[string]string{}
+	payloadJSON, _ := json.Marshal(payload)
+	bodyReader := strings.NewReader(string(payloadJSON))
+	req := httptest.NewRequest("POST", "/api/auth/registrations", bodyReader)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := r.Test(req)
+	body, _ := ioutil.ReadAll(resp.Body)
+	json.Unmarshal(body, &res)
+	assert.Equal(t, http.StatusCreated, resp.StatusCode, "HTTP Status Code should be equal to CREATED")
+	assert.Equal(t, "Success created new user", res["message"], "msg should be equal to Success created new user")
+}
+
+func TestRegisterAPIDuplicateEmail(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	urMock := mock.NewMockManager(ctrl)
+	pwdMock := mock.NewMockHasher(ctrl)
+	userManager := user.NewManager(urMock, pwdMock)
+	managers := &app.Managers{
+		UserManager: userManager,
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.Name, func(t *testing.T) {
-			pwdMock.EXPECT().Hash(gomock.Any()).Return(tc.Payload.Password).Times(1)
-			urMock.EXPECT().Register(tc.Payload).Return(&tc.Payload, nil).Times(1)
-			jwtMock.EXPECT().Generate(&tc.Payload).Times(1)
+	v, trans := app.SetupValidator()
+	jwtMock := mock.NewMockTokenService(ctrl)
+	r := app.SetupApp(managers, jwtMock, v, trans)
 
-			res := map[string]string{}
-			payloadJSON, _ := json.Marshal(tc.Payload)
-			bodyReader := strings.NewReader(string(payloadJSON))
-			req := httptest.NewRequest("POST", "/api/auth/registrations", bodyReader)
-			req.Header.Set("Content-Type", "application/json")
-			resp, _ := r.Test(req)
-			body, _ := ioutil.ReadAll(resp.Body)
-			json.Unmarshal(body, &res)
-			assert.Equal(t, tc.Code, resp.StatusCode, "HTTP Status Code should be equal to created")
-			assert.Equal(t, tc.Msg, res["message"], fmt.Sprintf("msg should be equal to %v", tc.Msg))
-		})
-	}
+	payload := generateUser()
+
+	pwdMock.EXPECT().Hash(gomock.Any()).Return(payload.Password).Times(1)
+	urMock.EXPECT().Register(payload).Return(nil, errors.New("DUPLICATE EMAIL")).Times(1)
+
+	res := map[string]string{}
+	payloadJSON, _ := json.Marshal(payload)
+	bodyReader := strings.NewReader(string(payloadJSON))
+	req := httptest.NewRequest("POST", "/api/auth/registrations", bodyReader)
+	req.Header.Set("Content-Type", "application/json")
+	resp, _ := r.Test(req)
+	body, _ := ioutil.ReadAll(resp.Body)
+	json.Unmarshal(body, &res)
+	assert.Equal(t, http.StatusConflict, resp.StatusCode, "HTTP Status Code should be equal to CONFLICT")
+	assert.Equal(t, "BAD REQUEST", res["message"], "msg should be equal to 'BAD REQUEST'")
 }
 
 func generateUser() user.User {
