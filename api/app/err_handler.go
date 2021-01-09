@@ -44,6 +44,15 @@ func customErrHandler(ctx *fiber.Ctx, err error) error {
 		}
 	}
 
+	if err.Error() == "DUPLICATE EMAIL" {
+		code = http.StatusConflict
+		msg = "BAD REQUEST"
+		details = append(details, ErrDetail{
+			Field:   "email",
+			Message: "Email already registered",
+		})
+	}
+
 	err = ctx.Status(code).JSON(ErrResponse{
 		Code:    code,
 		Message: msg,
