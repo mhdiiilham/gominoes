@@ -11,19 +11,11 @@ import (
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/golang/mock/gomock"
-	"github.com/joho/godotenv"
 	"github.com/mhdiiilham/gominoes/api/app"
 	"github.com/mhdiiilham/gominoes/entity/user"
 	mock "github.com/mhdiiilham/gominoes/mocks"
 	"github.com/stretchr/testify/assert"
 )
-
-func init() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		panic(err)
-	}
-}
 
 func TestRoot(t *testing.T) {
 	ctrl := gomock.NewController(t)
